@@ -174,11 +174,9 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
       }
     }
     
-    if (pos.length === 0) continue;
-    
     pos = adjustPositionForZeroEdges(currentNode.board, pos);
     
-    if (pos.length === 0) continue;
+    if (pos.length === 0) return;
     if (removeDuplicatePositionsString.has(pos.flat().join(','))) continue;
     
     removeDuplicatePositionsString.add(pos.flat().join(','));
@@ -239,44 +237,22 @@ let bestNode: TreeNode = {
 };
 
 autoPlay(tree, new Set<string>());
-// const bestNodes: TreeNode[] = [];
+const bestNodes: TreeNode[] = [];
 
-// console.log('========= auto play end ==========');
+console.log('========= auto play end ==========');
 
-// while (bestNode.parent !== null) {
-//   bestNodes.push(bestNode);
-//   bestNode = bestNode.parent;
-// }
+console.log('============== game board =============')
 
-// for (const bestNode of bestNodes.reverse()) {
-//   console.log(bestNode.position);
-//   // showMap(bestNode.board);
-//   console.log(`best score: ${bestNode.score}`);
-// }
-// console.log('============== simulate end =============')
+showMap(gameBoard);
 
-// const newPos = adjustPositionForZeroEdges(
-//   [
-//     [3, 4, 0, 0, 0, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-//     [3, 4, 0, 0, 0, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-//     [3, 4, 0, 0, 0, 7, 4, 0, 4, 0, 6, 0, 0, 0, 0, 0, 0, ],
-//     [0, 0, 7, 2, 0, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-//     [0, 0, 7, 2, 0, 6, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-//     [9, 4, 5, 7, 0, 2, 2, 4, 3, 0, 8, 1, 7, 6, 8, 0, 0, ],
-//     [3, 0, 0, 0, 0, 6, 5, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-//     [9, 8, 7, 0, 9, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-//     [8, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 0, ],
-//     [5, 7, 9, 0, 0, 9, 2, 6, 0, 0, 9, 0, 0, 0, 0, 0, 0, ],
-//     [7, 9, 6, 2, 6, 9, 5, 7, 0, 0, 6, 0, 7, 0, 8, 0, 8, ],
-//     [1, 4, 0, 0, 7, 5, 9, 0, 0, 4, 3, 0, 0, 0, 0, 0, 0, ],
-//     [0, 0, 0, 7, 1, 7, 6, 8, 0, 0, 0, 0, 0, 8, 4, 0, 8, ],
-//   ],
-//   [
-//     [0, 7], [0, 8], [0, 9], [0, 10], [0, 11],
-//     [1, 7], [1, 8], [1, 9], [1, 11], [1, 11],
-//     [1, 7], [2, 8], [2, 9], [2, 10], [2, 11],
-//     [3, 7], [3, 8], [3, 9], [3, 10], [3, 11],
-//   ]
-// )
+while (bestNode.parent !== null) {
+  bestNodes.push(bestNode);
+  bestNode = bestNode.parent;
+}
 
-// console.log(newPos)
+for (const bestNode of bestNodes.reverse()) {
+  console.log(bestNode.position);
+  // showMap(bestNode.board);
+  console.log(`best score: ${bestNode.score}`);
+}
+console.log('============== simulate end =============')
