@@ -89,7 +89,7 @@ test('checkArray between zero', () => {
   expect(sim.score).toEqual(4);
 }) 
 
-test('checkArray', () => {
+test('checkArray: update map', () => {
   const m = [
     [0, 0, 0, 1, 1, ], 
     [0, 0, 0, 1, 1, ], 

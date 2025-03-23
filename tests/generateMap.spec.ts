@@ -1,6 +1,5 @@
-import { expect, test, vi } from 'vitest';
+import { expect, test } from 'vitest';
 import { createRandomArray } from '../src/generateMap';
-import { extractGrid, checkArray, clearPos } from '../src/checker';
 
 test('generate map size', () => {
   const width = 17;
