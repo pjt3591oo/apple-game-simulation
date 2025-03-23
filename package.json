@@ -5,10 +5,11 @@
   "main": "index.js",
   "directories": {
     "test": "npx vitest",
-    "simulation": "ts-node simulation.ts"
+    "simulation": "ts-node simulate.ts"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx vitest",
+    "simulate": "ts-node simulate.ts"
   },
   "keywords": [],
   "author": "",
