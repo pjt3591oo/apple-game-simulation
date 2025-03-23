@@ -1,0 +1,19 @@
+{
+  "name": "apple-game-logic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "npx vitest",
+    "simulation": "ts-node simulation.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^3.0.9"
+  }
+}
