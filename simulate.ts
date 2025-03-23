@@ -1,4 +1,4 @@
-import { createRandomArray, showMap } from './src/generateMap';
+import { showMap } from './src/generateMap';
 import { checkArray } from './src/checker';
 
 let gameBoard = [
