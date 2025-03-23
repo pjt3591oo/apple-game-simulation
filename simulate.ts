@@ -1,6 +1,27 @@
 import { showMap } from './src/generateMap';
 import { checkArray } from './src/checker';
 
+type Position = {
+  startRow: number, 
+  startCol: number, 
+  endRow: number,
+  endCol: number,
+  height: number,
+  width: number,
+  values: number[][]
+}
+
+type TreeNode = {
+  score: number,
+  board: number[][],
+  parent: TreeNode | null,
+  position: number[][],
+  childrens: TreeNode[],
+}
+
+
+
+
 // let gameBoard = [
 //   /*[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16]  */
 //     [ 3, 4, 7, 3, 2, 7, 4, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, ],
@@ -14,19 +35,32 @@ import { checkArray } from './src/checker';
 //     [ 1, 4, 4, 6, 7, 5, 9, 0, 0, 0, 0, 0, 0, 4, 3, 5, 0, ],
 //     [ 6, 3, 1, 7, 1, 7, 6, 8, 0, 0, 0, 0, 1, 8, 4, 3, 8, ], // 9
 //   ];
-let gameBoard = [
-  /*[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16]  */
-    [ 3, 4, 7, 3, 2, 7, 4, 3, 4, 5, 6, 1, 1, 9, 1, 3, 5 ], // 0
-    [ 5, 5, 7, 2, 5, 6, 5, 1, 1, 2, 5, 2, 3, 2, 5, 3, 9 ], // 1
-    [ 9, 4, 5, 7, 5, 2, 2, 4, 3, 8, 8, 1, 7, 6, 8, 1, 2 ], // 2
-    [ 3, 5, 5, 4, 8, 6, 5, 8, 6, 1, 3, 8, 4, 6, 3, 7, 3 ], // 3
-    [ 9, 8, 7, 6, 9, 7, 4, 9, 1, 3, 6, 4, 2, 7, 6, 4, 6 ], // 4
-    [ 8, 5, 1, 7, 3, 9, 4, 1, 8, 9, 1, 5, 9, 9, 1, 7, 1 ], // 5
-    [ 5, 7, 9, 4, 6, 9, 2, 6, 9, 5, 9, 3, 4, 2, 4, 7, 6 ], // 6
-    [ 7, 9, 6, 2, 6, 9, 5, 7, 9, 1, 6, 5, 7, 6, 8, 7, 8 ], // 7
-    [ 1, 4, 4, 6, 7, 5, 9, 9, 1, 4, 3, 4, 6, 4, 3, 5, 2 ], // 8
-    [ 6, 3, 1, 7, 1, 7, 6, 8, 1, 6, 1, 2, 1, 8, 4, 3, 8 ], // 9
-  ];
+// let gameBoard = [
+//   /*[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16]  */
+//     [ 3, 4, 7, 3, 2, 7, 4, 3, 4, 5, 6, 1, 1, 9, 1, 3, 5 ], // 0
+//     [ 5, 5, 7, 2, 5, 6, 5, 1, 1, 2, 5, 2, 3, 2, 5, 3, 9 ], // 1
+//     [ 9, 4, 5, 7, 5, 2, 2, 4, 3, 8, 8, 1, 7, 6, 8, 1, 2 ], // 2
+//     [ 3, 5, 5, 4, 8, 6, 5, 8, 6, 1, 3, 8, 4, 6, 3, 7, 3 ], // 3
+//     [ 9, 8, 7, 6, 9, 7, 4, 9, 1, 3, 6, 4, 2, 7, 6, 4, 6 ], // 4
+//     [ 8, 5, 1, 7, 3, 9, 4, 1, 8, 9, 1, 5, 9, 9, 1, 7, 1 ], // 5
+//     [ 5, 7, 9, 4, 6, 9, 2, 6, 9, 5, 9, 3, 4, 2, 4, 7, 6 ], // 6
+//     [ 7, 9, 6, 2, 6, 9, 5, 7, 9, 1, 6, 5, 7, 6, 8, 7, 8 ], // 7
+//     [ 1, 4, 4, 6, 7, 5, 9, 9, 1, 4, 3, 4, 6, 4, 3, 5, 2 ], // 8
+//     [ 6, 3, 1, 7, 1, 7, 6, 8, 1, 6, 1, 2, 1, 8, 4, 3, 8 ], // 9
+//   ];
+// let gameBoard = [
+//   /*[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16]  */
+//     [ 3, 4, 7, 3, 2, 7, 4, 3, 4, 5, 6, 1, 1, 9, 1, 3, 5 ], // 0
+//     [ 5, 5, 7, 2, 5, 6, 5, 1, 1, 2, 5, 2, 3, 2, 5, 3, 9 ], // 1
+//     [ 9, 4, 5, 7, 5, 2, 2, 4, 3, 8, 8, 1, 7, 6, 8, 1, 2 ], // 2
+//     [ 3, 5, 5, 4, 8, 6, 5, 8, 6, 1, 3, 8, 4, 6, 3, 7, 3 ], // 3
+//     [ 9, 8, 7, 6, 9, 7, 4, 9, 1, 3, 6, 4, 2, 7, 6, 4, 6 ], // 4
+//     [ 8, 5, 1, 7, 3, 9, 4, 1, 8, 9, 1, 5, 9, 9, 1, 7, 1 ], // 5
+//     [ 5, 7, 9, 4, 6, 9, 2, 6, 9, 5, 9, 3, 4, 2, 4, 7, 6 ], // 6
+//     [ 7, 9, 6, 2, 6, 9, 5, 7, 9, 1, 6, 5, 7, 6, 8, 7, 8 ], // 7
+//     [ 1, 4, 4, 6, 7, 5, 9, 9, 1, 4, 3, 4, 6, 4, 3, 5, 2 ], // 8
+//     [ 6, 3, 1, 7, 1, 7, 6, 8, 1, 6, 1, 2, 1, 8, 4, 3, 8 ], // 9
+//   ];
 // let gameBoard = [
 //   /*[ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16]  */
 //     [ 1, 9, 1, 9, 1, 9, 1, 9, 1, 9, 1, 9, 1, 9, 1, 9, 2 ], // 0
@@ -84,6 +118,18 @@ let gameBoard = [
 //   [0, 0, 0, 7, 1, 7, 6, 8, 0, 0, 0, 0, 0, 8, 4, 0, 8, ],
 // ]
 
+let gameBoard = [
+  [5, 5, 6, 1, 2, 1, 6, 1, 1, 9, 8, 6, 6, 4, 7, 3, 3, 4],
+  [3, 2, 8, 5, 7, 1, 6, 1, 3, 3, 4, 4, 1, 3, 6, 7, 5, 3],
+  [7, 4, 3, 3, 2, 2, 8, 8, 3, 1, 1, 2, 5, 1, 1, 3 ,3 ,1],
+  [5, 5, 5, 5, 5, 7, 3, 2, 2, 4, 8, 9, 1, 2, 5, 7 ,1 ,2],
+  [2, 8, 5, 5, 6, 5, 6, 5, 4, 4, 4, 1, 5, 4, 2, 7 ,7 ,7],
+  [3, 1, 2, 1, 1, 6, 1, 5, 3, 6, 5, 8, 3, 5, 2, 2 ,1 ,1],
+  [6, 4, 5, 2, 6, 2, 5, 7, 5, 6, 5, 2, 3, 5, 8, 5 ,4 ,2],
+  [3, 7, 2, 8, 6, 4, 5, 3, 5, 4, 1, 9, 6, 4, 6, 2 ,2 ,9],
+  [1, 2, 2, 1, 3, 3, 4, 1, 9, 7, 8, 6, 6, 9, 5, 3 ,7 ,6],
+]
+
 function userAction(gameBoard: number[][], positions: number[][]) {
   const boardCopy = deepCopyBoard(gameBoard);
   const sim = checkArray(boardCopy, positions);
@@ -112,15 +158,6 @@ function getRectangleValues(array: number[][], startRow: number, startCol: numbe
   return values;
 }
 
-type Position = {
-  startRow: number, 
-  startCol: number, 
-  endRow: number,
-  endCol: number,
-  height: number,
-  width: number,
-  values: number[][]
-}
 
 function findRectanglesWithSum10(array: number[][]) {
   const rows = array.length;
@@ -220,29 +257,6 @@ function adjustPositionForZeroEdges(arr: number[][], positions: number[][]): num
   });
 }
 
-type TreeNode = {
-  score: number,
-  board: number[][],
-  parent: TreeNode | null,
-  position: number[][],
-  childrens: TreeNode[],
-}
-
-let tree: TreeNode = {
-  score: 0,
-  board: deepCopyBoard(gameBoard),
-  parent: null,
-  position: [],
-  childrens: [],
-};
-
-let bestNode: TreeNode = {
-  score: 0,
-  board: deepCopyBoard(gameBoard),
-  parent: null,
-  position: [],
-  childrens: [],
-};
 
 
 function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), removeDuplicatePositionsString = new Set<string>()) {
@@ -255,7 +269,7 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
   visitedStates.add(boardState);
   
   let positions = findRectanglesWithSum10(deepCopyBoard(currentNode.board));
-  const removeDuplicatePositions: Position[] = [];
+  const removeDuplicatePositions: any[] = [];
   
   for (const position of positions) {
     let pos: number[][] = [];
@@ -269,10 +283,25 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
     
     pos = adjustPositionForZeroEdges(currentNode.board, pos);
     
-    if (pos.length === 0) return;
-    if (removeDuplicatePositionsString.has(pos.flat().join(','))) return;
+    if (pos.length === 0) continue;
+    if (removeDuplicatePositionsString.has(pos.flat().join(','))) continue;
     
     removeDuplicatePositionsString.add(pos.flat().join(','));
+    removeDuplicatePositions.push(position);
+  }
+
+  if (removeDuplicatePositions.length === 0) {
+    return;
+  }
+
+  for (const position of removeDuplicatePositions) {
+    let pos: number[][] = [];
+    for (let i = position.startRow ; i <= position.endRow ; ++i) {
+      for (let j = position.startCol ; j <= position.endCol ; ++j) {
+        pos.push([i, j]);
+      }
+    }
+    
 
     const sim = userAction(deepCopyBoard(currentNode.board), pos);
     
@@ -294,49 +323,64 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
     console.log(`best score: ${bestNode.score}, position count: ${positions.length} / ${removeDuplicatePositions.length}`);
     showMap(bestNode.board);
     autoPlay(tempNode, visitedStates, new Set(Array.from(removeDuplicatePositionsString)));
-
   }
 }
 
+let tree: TreeNode = {
+  score: 0,
+  board: deepCopyBoard(gameBoard),
+  parent: null,
+  position: [],
+  childrens: [],
+};
+
+let bestNode: TreeNode = {
+  score: 0,
+  board: deepCopyBoard(gameBoard),
+  parent: null,
+  position: [],
+  childrens: [],
+};
+
 autoPlay(tree, new Set<string>());
-const bestNodes: TreeNode[] = [];
+// const bestNodes: TreeNode[] = [];
 
-console.log('========= auto play end ==========');
+// console.log('========= auto play end ==========');
 
-while (bestNode.parent !== null) {
-  bestNodes.push(bestNode);
-  bestNode = bestNode.parent;
-}
+// while (bestNode.parent !== null) {
+//   bestNodes.push(bestNode);
+//   bestNode = bestNode.parent;
+// }
 
-for (const bestNode of bestNodes.reverse()) {
-  console.log(bestNode.position);
-  // showMap(bestNode.board);
-  console.log(`best score: ${bestNode.score}`);
-}
-console.log('============== simulate end =============')
+// for (const bestNode of bestNodes.reverse()) {
+//   console.log(bestNode.position);
+//   // showMap(bestNode.board);
+//   console.log(`best score: ${bestNode.score}`);
+// }
+// console.log('============== simulate end =============')
 
-const newPos = adjustPositionForZeroEdges(
-  [
-    [3, 4, 0, 0, 0, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-    [3, 4, 0, 0, 0, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-    [3, 4, 0, 0, 0, 7, 4, 0, 4, 0, 6, 0, 0, 0, 0, 0, 0, ],
-    [0, 0, 7, 2, 0, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-    [0, 0, 7, 2, 0, 6, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-    [9, 4, 5, 7, 0, 2, 2, 4, 3, 0, 8, 1, 7, 6, 8, 0, 0, ],
-    [3, 0, 0, 0, 0, 6, 5, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-    [9, 8, 7, 0, 9, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
-    [8, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 0, ],
-    [5, 7, 9, 0, 0, 9, 2, 6, 0, 0, 9, 0, 0, 0, 0, 0, 0, ],
-    [7, 9, 6, 2, 6, 9, 5, 7, 0, 0, 6, 0, 7, 0, 8, 0, 8, ],
-    [1, 4, 0, 0, 7, 5, 9, 0, 0, 4, 3, 0, 0, 0, 0, 0, 0, ],
-    [0, 0, 0, 7, 1, 7, 6, 8, 0, 0, 0, 0, 0, 8, 4, 0, 8, ],
-  ],
-  [
-    [0, 7], [0, 8], [0, 9], [0, 10], [0, 11],
-    [1, 7], [1, 8], [1, 9], [1, 11], [1, 11],
-    [1, 7], [2, 8], [2, 9], [2, 10], [2, 11],
-    [3, 7], [3, 8], [3, 9], [3, 10], [3, 11],
-  ]
-)
+// const newPos = adjustPositionForZeroEdges(
+//   [
+//     [3, 4, 0, 0, 0, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+//     [3, 4, 0, 0, 0, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+//     [3, 4, 0, 0, 0, 7, 4, 0, 4, 0, 6, 0, 0, 0, 0, 0, 0, ],
+//     [0, 0, 7, 2, 0, 6, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+//     [0, 0, 7, 2, 0, 6, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+//     [9, 4, 5, 7, 0, 2, 2, 4, 3, 0, 8, 1, 7, 6, 8, 0, 0, ],
+//     [3, 0, 0, 0, 0, 6, 5, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+//     [9, 8, 7, 0, 9, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+//     [8, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 0, ],
+//     [5, 7, 9, 0, 0, 9, 2, 6, 0, 0, 9, 0, 0, 0, 0, 0, 0, ],
+//     [7, 9, 6, 2, 6, 9, 5, 7, 0, 0, 6, 0, 7, 0, 8, 0, 8, ],
+//     [1, 4, 0, 0, 7, 5, 9, 0, 0, 4, 3, 0, 0, 0, 0, 0, 0, ],
+//     [0, 0, 0, 7, 1, 7, 6, 8, 0, 0, 0, 0, 0, 8, 4, 0, 8, ],
+//   ],
+//   [
+//     [0, 7], [0, 8], [0, 9], [0, 10], [0, 11],
+//     [1, 7], [1, 8], [1, 9], [1, 11], [1, 11],
+//     [1, 7], [2, 8], [2, 9], [2, 10], [2, 11],
+//     [3, 7], [3, 8], [3, 9], [3, 10], [3, 11],
+//   ]
+// )
 
-console.log(newPos)
+// console.log(newPos)
