@@ -24,7 +24,9 @@ type TreeNode = {
 
 // let gameBoard = createRandomArray(10, 17, 1, 9);
 
-let gameBoard = board['9']
+const startAtTs = Date.now();
+
+let gameBoard = board['3']
 
 function userAction(gameBoard: number[][], positions: number[][]) {
   const boardCopy = deepCopyBoard(gameBoard);
@@ -52,10 +54,6 @@ function getRectangleValues(array: number[][], startRow: number, startCol: numbe
     values.push(row);
   }
   return values;
-}
-
-function shuffle(array: Position[]) {
-  return array.sort(() => Math.random() - 0.5);
 }
 
 function findRectanglesWithSum10(array: number[][]) {
@@ -96,8 +94,12 @@ function boardToString(board: number[][]): string {
   return board.map(row => row.join(',')).join('|');
 }
 
-function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), removeDuplicatePositionsString = new Set<string>(), daps: number = 0, maxDaps: number = 55) {
+function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), daps: number = 0, maxDaps: number = 55) {
   
+  if (bestNode.score >= currentNode.board.length * currentNode.board[0].length) {
+    return;
+  }
+
   if (daps > maxDaps) {
     return;
   }
@@ -110,8 +112,10 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
   visitedStates.add(boardState);
   
   let positions = findRectanglesWithSum10(deepCopyBoard(currentNode.board));
-  const removeDuplicatePositions: Position[] = [];
+  const removeDuplicatePositions: number[][][] = [];
   
+  const removeDuplicatePositionsString = new Set<string>()
+
   for (const position of positions) {
     let pos: number[][] = [];
     for (let i = position.startRow ; i <= position.endRow ; ++i) {
@@ -126,7 +130,7 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
     if (removeDuplicatePositionsString.has(pos.flat().join(','))) continue;
     
     removeDuplicatePositionsString.add(pos.flat().join(','));
-    removeDuplicatePositions.push(position);
+    removeDuplicatePositions.push(pos);
   }
 
   if (removeDuplicatePositions.length === 0) {
@@ -134,36 +138,22 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
   }
 
   for (const position of removeDuplicatePositions) {
-    let pos: number[][] = [];
-    for (let i = position.startRow ; i <= position.endRow ; ++i) {
-      for (let j = position.startCol ; j <= position.endCol ; ++j) {
-        pos.push([i, j]);
-      }
-    }
-    const changedPos = removeFullZero(currentNode.board, pos);
-    const sim = userAction(deepCopyBoard(currentNode.board), pos);
+
+    const sim = userAction(deepCopyBoard(currentNode.board), position);
     
     const tempNode = {
       score: currentNode.score + sim.score,
       board: deepCopyBoard(sim.newMap),
       parent: currentNode,
-      position: pos,
+      position: position,
     }
-    
-    // currentNode.childrens.push(tempNode);
     
     if (bestNode.score <= tempNode.score) {
       bestNode = tempNode;
     }
     
-    console.log(pos)
-    console.log(changedPos)
-    showMap(tempNode.parent?.board || []);
-    console.log()
-    showMap(tempNode.board);
-    console.log(`daps: ${daps}, add score: ${sim.score}, ${sim.isMatch} current score: ${currentNode.score}, best score: ${bestNode.score}, position count: ${positions.length} / ${removeDuplicatePositions.length}`);
-    console.log('***')
-    autoPlay(tempNode, visitedStates, new Set(Array.from(removeDuplicatePositionsString)), daps + 1, maxDaps);
+    console.log(`daps: ${daps}, add score: ${sim.score}, ${sim.isMatch} current score: ${currentNode.score}, best score: ${bestNode.score}, position count: ${positions.length} / ${removeDuplicatePositions.length}, duration Time : ${Date.now() - startAtTs}ms`);
+    autoPlay(tempNode, visitedStates, daps + 1, maxDaps);
   }
 }
 
@@ -172,7 +162,6 @@ let tree: TreeNode = {
   board: deepCopyBoard(gameBoard),
   parent: null,
   position: [],
-  // childrens: [],
 };
 
 let bestNode: TreeNode = {
@@ -180,15 +169,16 @@ let bestNode: TreeNode = {
   board: deepCopyBoard(gameBoard),
   parent: null,
   position: [],
-  // childrens: [],
 };
 
-autoPlay(tree, new Set<string>(), new Set<string>(), 0, 10);
+autoPlay(tree, new Set<string>(), 0, 1000);
 const bestNodes: TreeNode[] = [];
 
 console.log('========= auto play end ==========');
 
 console.log('============== game board =============')
+
+const endAtTs = Date.now();
 
 showMap(gameBoard);
 
@@ -202,4 +192,5 @@ for (const bestNode of bestNodes.reverse()) {
   showMap(bestNode.board);
   console.log(`best score: ${bestNode.score}`);
 }
-console.log('============== simulate end =============')
+
+console.log(`============== simulate end ${ endAtTs - startAtTs }ms =============`)
