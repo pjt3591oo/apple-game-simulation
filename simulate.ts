@@ -1,5 +1,7 @@
 import { createRandomArray, showMap } from './src/generateMap';
 import { checkArray } from './src/checker';
+import board from './data/board';
+import { removeFullZero } from './utils/remove';
 
 type Position = {
   startRow: number, 
@@ -16,11 +18,13 @@ type TreeNode = {
   board: number[][],
   parent: TreeNode | null,
   position: number[][],
-  childrens: TreeNode[],
+  // childrens: TreeNode[],
 }
 
 
-let gameBoard = createRandomArray(10, 17, 1, 9);
+// let gameBoard = createRandomArray(10, 17, 1, 9);
+
+let gameBoard = board['9']
 
 function userAction(gameBoard: number[][], positions: number[][]) {
   const boardCopy = deepCopyBoard(gameBoard);
@@ -81,7 +85,7 @@ function findRectanglesWithSum10(array: number[][]) {
     }
   }
 
-  return shuffle(results)
+  return results.sort((a, b) => a.values.length - b.values.length);
 }
 
 function deepCopyBoard(board: number[][]): number[][] {
@@ -92,70 +96,12 @@ function boardToString(board: number[][]): string {
   return board.map(row => row.join(',')).join('|');
 }
 
-function isPositionBetweenNonZeroValues(arr: number[][], row: number, col: number): boolean {
-  let leftNonZero = false;
-  let rightNonZero = false;
+function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), removeDuplicatePositionsString = new Set<string>(), daps: number = 0, maxDaps: number = 55) {
   
-  for (let j = col - 1; j >= 0; j--) {
-    if (arr[row][j] !== 0) {
-      leftNonZero = true;
-      break;
-    }
+  if (daps > maxDaps) {
+    return;
   }
-  
-  for (let j = col + 1; j < arr[0].length; j++) {
-    if (arr[row][j] !== 0) {
-      rightNonZero = true;
-      break;
-    }
-  }
-  
-  let topNonZero = false;
-  let bottomNonZero = false;
-  
-  for (let i = row - 1; i >= 0; i--) {
-    if (arr[i][col] !== 0) {
-      topNonZero = true;
-      break;
-    }
-  }
-  
-  for (let i = row + 1; i < arr.length; i++) {
-    if (arr[i][col] !== 0) {
-      bottomNonZero = true;
-      break;
-    }
-  }
-  
-  return (leftNonZero && rightNonZero) || (topNonZero && bottomNonZero);
-}
 
-// 전체가 0인 행과 열에 속하는 위치를 제거하되, 0이 아닌 값 사이에 있는 0은 유지
-function adjustPositionForZeroEdges(arr: number[][], positions: number[][]): number[][] {
-  return positions.filter(pos => {
-    const row = pos[0];
-    const col = pos[1];
-    
-    if (row < 0 || row >= arr.length || col < 0 || col >= arr[0].length) {
-      return false;
-    }
-    
-    if (arr[row][col] !== 0) {
-      return true;
-    }
-    
-    if (isPositionBetweenNonZeroValues(arr, row, col)) {
-      return true;
-    }
-    
-    return false;
-  });
-}
-
-
-
-function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), removeDuplicatePositionsString = new Set<string>()) {
-  
   const boardState = boardToString(currentNode.board);
   if (visitedStates.has(boardState)) {
     return;
@@ -164,7 +110,7 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
   visitedStates.add(boardState);
   
   let positions = findRectanglesWithSum10(deepCopyBoard(currentNode.board));
-  const removeDuplicatePositions: any[] = [];
+  const removeDuplicatePositions: Position[] = [];
   
   for (const position of positions) {
     let pos: number[][] = [];
@@ -174,7 +120,7 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
       }
     }
     
-    pos = adjustPositionForZeroEdges(currentNode.board, pos);
+    pos = removeFullZero(currentNode.board, pos);
     
     if (pos.length === 0) return;
     if (removeDuplicatePositionsString.has(pos.flat().join(','))) continue;
@@ -194,29 +140,30 @@ function autoPlay(currentNode: TreeNode, visitedStates = new Set<string>(), remo
         pos.push([i, j]);
       }
     }
-    
-
+    const changedPos = removeFullZero(currentNode.board, pos);
     const sim = userAction(deepCopyBoard(currentNode.board), pos);
     
     const tempNode = {
       score: currentNode.score + sim.score,
       board: deepCopyBoard(sim.newMap),
       parent: currentNode,
-      childrens: [],
       position: pos,
     }
     
-    currentNode.childrens.push(tempNode);
+    // currentNode.childrens.push(tempNode);
     
     if (bestNode.score <= tempNode.score) {
       bestNode = tempNode;
     }
     
-    // console.log(pos.flat().join(', '));    
     console.log(pos)
-    console.log(`best score: ${bestNode.score}, position count: ${positions.length} / ${removeDuplicatePositions.length}`);
-    showMap(bestNode.board);
-    autoPlay(tempNode, visitedStates, new Set(Array.from(removeDuplicatePositionsString)));
+    console.log(changedPos)
+    showMap(tempNode.parent?.board || []);
+    console.log()
+    showMap(tempNode.board);
+    console.log(`daps: ${daps}, add score: ${sim.score}, ${sim.isMatch} current score: ${currentNode.score}, best score: ${bestNode.score}, position count: ${positions.length} / ${removeDuplicatePositions.length}`);
+    console.log('***')
+    autoPlay(tempNode, visitedStates, new Set(Array.from(removeDuplicatePositionsString)), daps + 1, maxDaps);
   }
 }
 
@@ -225,7 +172,7 @@ let tree: TreeNode = {
   board: deepCopyBoard(gameBoard),
   parent: null,
   position: [],
-  childrens: [],
+  // childrens: [],
 };
 
 let bestNode: TreeNode = {
@@ -233,10 +180,10 @@ let bestNode: TreeNode = {
   board: deepCopyBoard(gameBoard),
   parent: null,
   position: [],
-  childrens: [],
+  // childrens: [],
 };
 
-autoPlay(tree, new Set<string>());
+autoPlay(tree, new Set<string>(), new Set<string>(), 0, 10);
 const bestNodes: TreeNode[] = [];
 
 console.log('========= auto play end ==========');
@@ -252,7 +199,7 @@ while (bestNode.parent !== null) {
 
 for (const bestNode of bestNodes.reverse()) {
   console.log(bestNode.position);
-  // showMap(bestNode.board);
+  showMap(bestNode.board);
   console.log(`best score: ${bestNode.score}`);
 }
 console.log('============== simulate end =============')
